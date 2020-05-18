@@ -6,7 +6,9 @@ import useAuthToken from '../hooks/useAuthToken';
 export default function PrivateRoute(props) {
     const [ token ] = useAuthToken();
     console.log();
-	const history = useHistory();
+
+    const history = useHistory();
+    
 	useEffect(() => {
 		if (token === '' || token === null)
 			// redirect back to login on root
