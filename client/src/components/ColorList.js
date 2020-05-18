@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import useAxiosWithAuth from '../hooks/useAxiosWithAuth';
+import ColorForm from './ColorForm';
 
 const initialColor = {
 	color: '',
@@ -11,6 +12,7 @@ const ColorList = ({ colors, updateColors }) => {
 	console.log(colors);
 	const [ editing, setEditing ] = useState(false);
 	const [ colorToEdit, setColorToEdit ] = useState(initialColor);
+	const [ colorToCreate, setColorToCreate ] = useState(initialColor);
 
 	const axios = useAxiosWithAuth();
 
@@ -19,7 +21,16 @@ const ColorList = ({ colors, updateColors }) => {
 		setColorToEdit(color);
 	};
 
-	const saveEdit = async (e) => {
+  const createColor = async (e) => {
+    e.preventDefault();
+    const response = await axios.post(`http://localhost:5000/api/colors`, colorToCreate);
+    updateColors(response.data);
+
+    //reset the form after created color
+    setColorToCreate(initialColor);
+  }
+
+  const saveEdit = async (e) => {
 		e.preventDefault();
 		axios.put(`http://localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit);
 		setEditing(false);
@@ -74,34 +85,26 @@ const ColorList = ({ colors, updateColors }) => {
 				))}
 			</ul>
 			{editing && (
-				<form onSubmit={saveEdit}>
-					<legend>edit color</legend>
-					<label>
-						color name:
-						<input
-							onChange={(e) => setColorToEdit({ ...colorToEdit, color: e.target.value })}
-							value={colorToEdit.color}
-						/>
-					</label>
-					<label>
-						hex code:
-						<input
-							onChange={(e) =>
-								setColorToEdit({
-									...colorToEdit,
-									code: { hex: e.target.value }
-								})}
-							value={colorToEdit.code.hex}
-						/>
-					</label>
-					<div className="button-row">
-						<button type="submit">save</button>
-						<button onClick={() => setEditing(false)}>cancel</button>
-					</div>
-				</form>
-			)}
+				<ColorForm
+					onSubmit={saveEdit}
+					onCancel={() => setEditing(false)}
+					color={colorToEdit}
+					updateColor={setColorToEdit}
+					legend="Edit color"
+				/>
+
+      
+      )}
+      			{/* stretch - build another form here to add a color */}
+
+      <ColorForm
+					onSubmit={createColor}
+					onCancel={() => setColorToCreate(initialColor)}
+					color={colorToCreate}
+					updateColor={setColorToCreate}
+					legend="Create color"
+				/>
 			<div className="spacer" />
-			{/* stretch - build another form here to add a color */}
 		</div>
 	);
 };
